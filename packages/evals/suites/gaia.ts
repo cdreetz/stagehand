@@ -14,6 +14,11 @@ export const buildGAIATestcases = (models: string[]): Testcase[] => {
   const levelFilter = process.env.EVAL_GAIA_LEVEL
     ? Number(process.env.EVAL_GAIA_LEVEL)
     : undefined;
+
+  const exampleIdFilter = process.env.EVAL_EXAMPLE_ID
+    ? process.env.EVAL_EXAMPLE_ID
+    : undefined;
+
   // Use EVAL_MAX_K if set, otherwise fall back to EVAL_GAIA_LIMIT or default to 25
   const maxCases = process.env.EVAL_MAX_K
     ? Number(process.env.EVAL_MAX_K)
@@ -45,9 +50,13 @@ export const buildGAIATestcases = (models: string[]): Testcase[] => {
   const candidates = parseJsonlRows(gaiaLines, isGaiaRow);
 
   // Filter by level if specified
-  const filteredCandidates = levelFilter
+  const levelFiltered = levelFilter
     ? candidates.filter((row) => row.Level === levelFilter)
     : candidates;
+
+  const filteredCandidates = exampleIdFilter
+    ? levelFiltered.filter((row) => row.id === exampleIdFilter)
+    : levelFiltered;
 
   const gaiaRows = applySampling(filteredCandidates, sampleCount, maxCases);
 
